@@ -45,6 +45,9 @@ BEGIN_MESSAGE_MAP(CDataprocessingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BQ5, &CDataprocessingDlg::OnBnClickedBq5)
 	ON_BN_CLICKED(IDC_BQ7, &CDataprocessingDlg::OnBnClickedBq7)
 	ON_BN_CLICKED(IDC_BQ8, &CDataprocessingDlg::OnBnClickedBq8)
+	ON_BN_CLICKED(IDC_BQ9, &CDataprocessingDlg::OnBnClickedBq9)
+	ON_BN_CLICKED(IDC_BQ10, &CDataprocessingDlg::OnBnClickedBq10)
+	ON_BN_CLICKED(IDC_BQ11, &CDataprocessingDlg::OnBnClickedBq11)
 END_MESSAGE_MAP()
 
 
@@ -248,26 +251,195 @@ void CDataprocessingDlg::OnBnClickedBq7()
 	}
 	myFile.Close();
 }
+//获取Debug或Release所在的路径  
+CString GetModuleDir()   
+{   
+	HMODULE module = GetModuleHandle(0);   
+	char pFileName[MAX_PATH];   
+	GetModuleFileName(module, pFileName, MAX_PATH);   
+
+	CString csFullPath(pFileName);   
+	int nPos = csFullPath.ReverseFind( _T('\\') );   
+	if( nPos < 0 )   
+		return CString("");   
+	else   
+		return csFullPath.Left( nPos );   
+}
+// 获取当前工作路径（dsp所在路径）  
+CString GetWorkDir()   
+{    
+	char pFileName[MAX_PATH];   
+	int nPos = GetCurrentDirectory( MAX_PATH, pFileName);   
+
+	CString csFullPath(pFileName);    
+	if( nPos < 0 )   
+		return CString("");   
+	else   
+		return csFullPath;   
+}  
 
 void CDataprocessingDlg::OnBnClickedBq8()
 {
 	// TODO: Add your control notification handler code here
 	CStdioFile myFile;
-	if(myFile.Open("VII.txt",CFile::typeText|CFile::modeReadWrite))
+	CString str;
+	CString path;
+	path = GetWorkDir();
+	path = path + _T("\\VII.txt");
+	if(myFile.Open(path,CFile::typeText|CFile::modeReadWrite))
 	{
-		myFile.SeekToBegin();
-		CString str1;
-		myFile.ReadString(str1);
-		CString str2;
-		myFile.ReadString(str2);
-		AfxMessageBox(str1+str2);
+		while (myFile.ReadString(str))
+		{
+			GetDlgItem(IDC_SQEiOut)->SetWindowText(str);
+			Sleep(50);
+		}
+		myFile.Close();
+	}
+}
+
+void linearReg(float x[100],float y[100],float f[2])
+{
+	float a,b;
+	float sxx,syy,sxy,sx,sy;
+	sxx = 0;
+	syy = 0;
+	sxy = 0;
+	sx = 0;
+	sy = 0;
+	for (int i = 0;i<100;i++)
+	{
+		sxx = x[i]*x[i]+sxx;
+		syy = y[i]*y[i]+syy;
+		sxy = x[i]*y[i]+sxy;
+		sx = x[i]+sx;
+		sy = y[i]+sy;
+	}
+	a = (100*sxy - sx*sy)/(100*sxx-sx*sx);
+	b = (sxx*sy - sx*sxy)/(100*sxx-sx*sx);
+	f[0] = a;
+	f[1] = b;
+}
+
+void CDataprocessingDlg::OnBnClickedBq9()
+{
+	// TODO: Add your control notification handler code here
+	CStdioFile myFile;
+	CString str,tmpstr;
+	CString path;
+	float x[100],y[100],z[100];
+	int t[100];
+	float data[100][4];
+	int i = 0;
+	int j = 0;
+	path = GetWorkDir();
+	path = path + _T("\\VII.txt");
+	if(myFile.Open(path,CFile::typeText|CFile::modeReadWrite))
+	{
+		while (myFile.ReadString(str))
+		{
+			if (i < 100)
+			{
+				int pos = str.Find(",");
+				j = 0;
+				while(pos>0) // pos == 0的时候，是逗号在第一个位置，这里不考虑。
+				{
+					tmpstr = str.Left(pos);
+					data[i][j++]=atof(tmpstr);
+					str = str.Right(str.GetLength()-pos-1);
+					pos = str.Find(",");
+				}
+				if (pos < 0)
+				{
+					data[i][j] =atof(str);
+				}
+				x[i] = data[i][1];
+				y[i] = data[i][2];
+				z[i] = data[i][3];
+				//sscanf(str,"%d,%f,%f,%f",t[i],x[i],y[i],z[i]);
+			}
+
+			i++;			
+		}
+		myFile.Close();
+	}
+	//GetDlgItem(IDC_SQNineOut)->SetWindowText(_T("Data Loeaded"));
+	float fb[2];
+	linearReg(x,y,fb);
+	tmpstr.Format("%s%f","The value of a is :",fb[0]);
+	str = tmpstr;
+	tmpstr.Format("%s%f","\nThe value of b is :",fb[1]);
+	str = str+tmpstr;
+	GetDlgItem(IDC_SQNineOut)->SetWindowText(str);
+}
+
+void CDataprocessingDlg::OnBnClickedBq10()
+{
+	// TODO: Add your control notification handler code here
+	CString s_t,str,tmpstr;
+	GetDlgItemText(IDC_EQTenIn,s_t);
+	float t,y[11];
+	t = atof(s_t);
+	int x[11] = {0};
+	for (int i = 0; i < 11; i++)
+	{
+		x[i] = 2*(i+1);
+		y[i] = 50*sin(2*3.14*(t/4-x[i]/10));
+		tmpstr.Format("%f\n",y[i]);
+		str = str + tmpstr;
+	}
+	GetDlgItem(IDC_SQTenOut)->SetWindowText(str);
+}
+
+void CDataprocessingDlg::OnBnClickedBq11()
+{
+	// TODO: Add your control notification handler code here
+	CStdioFile myFile;
+	CString str,tmpstr,showstr;
+	CString path;
+	float *x[100],*y[100];
+	int *t[100];
+	float data[100][4];
+	int i = 0;
+	int j = 0;
+	int tmp;
+	path = GetWorkDir();
+	path = path + _T("\\VII.txt");
+	if(myFile.Open(path,CFile::typeText|CFile::modeReadWrite))
+	{
+		while (myFile.ReadString(str))
+		{
+			if (i < 100)
+			{
+				int pos = str.Find(",");
+				j = 0;
+				while(pos>0) // pos == 0的时候，是逗号在第一个位置，这里不考虑。
+				{
+					tmpstr = str.Left(pos);
+					data[i][j++]=atof(tmpstr);
+					str = str.Right(str.GetLength()-pos-1);
+					pos = str.Find(",");
+				}
+				if (pos < 0)
+				{
+					data[i][j] =atof(str);
+				}
+				tmp = int(data[i][0]);
+				t[i] = &tmp;
+				x[i] = &data[i][1];
+				y[i] = &data[i][2];
+				//sscanf(str,"%d,%f,%f,%f",t[i],x[i],y[i],z[i]);
+			}
+			tmpstr.Format("%d,%f,%f\n",*t[i],*x[i],*y[i]);
+			showstr = showstr + tmpstr;
+			i++;			
+		}
 	}
 	myFile.Close();
+	GetDlgItem(IDC_SQEleOut)->SetWindowText(showstr);
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void CDataprocessingDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: Add your message handler code here and/or call default
@@ -293,10 +465,6 @@ BOOL CDataprocessingDlg::PreTranslateMessage(MSG* pMsg)
 	//如果处理可视化字符可以使用WM_CHAR, 使用WM_KEYDOWN时需判断大写键, Shift键, Ctrl键, Alt键是否按下
 	if (pMsg->message == WM_CHAR)
 	{
-		//if(pMsg->wParam >= 'a' && pMsg->wParam <= 'z') 
-		//{ AfxMessageBox("小写"); } 
-		//else if(pMsg->wParam >= 'A' && pMsg->wParam <= 'Z') 
-		//{ AfxMessageBox("大写"); } 
 		CString str;
 		str.Format("%c",pMsg->wParam);
 		GetDlgItem(IDC_SQFivOut)->SetWindowText(str);
@@ -310,6 +478,7 @@ BOOL CDataprocessingDlg::PreTranslateMessage(MSG* pMsg)
 
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
+
 
 
 
