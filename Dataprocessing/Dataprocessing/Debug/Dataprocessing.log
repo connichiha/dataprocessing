@@ -1,4 +1,4 @@
-﻿Build started 2015/1/22 22:06:46.
+﻿Build started 2015/1/23 22:53:22.
      1>Project "D:\Projects\code\test\Dataprocessing\Dataprocessing\Dataprocessing.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Dataprocessing.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -6,6 +6,10 @@
          All outputs are up-to-date.
          d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\Dataprocessing.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt DataprocessingDlg.cpp
          DataprocessingDlg.cpp
+     1>d:\projects\code\test\dataprocessing\dataprocessing\dataprocessingdlg.cpp(235): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>d:\projects\code\test\dataprocessing\dataprocessing\dataprocessingdlg.cpp(237): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\projects\code\test\dataprocessing\dataprocessing\dataprocessingdlg.cpp(238): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\projects\code\test\dataprocessing\dataprocessing\dataprocessingdlg.cpp(239): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
        ResourceCompile:
          All outputs are up-to-date.
        ManifestResourceCompile:
@@ -29,4 +33,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.62
+Time Elapsed 00:00:01.97

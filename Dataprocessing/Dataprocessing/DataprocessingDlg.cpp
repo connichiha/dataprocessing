@@ -17,7 +17,7 @@
 
 // CDataprocessingDlg dialog
 
-
+int flag_Q5 = 0;
 
 
 CDataprocessingDlg::CDataprocessingDlg(CWnd* pParent /*=NULL*/)
@@ -42,6 +42,9 @@ BEGIN_MESSAGE_MAP(CDataprocessingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BQ6, &CDataprocessingDlg::OnBnClickedBq6)
 	ON_BN_CLICKED(IDC_BQ3, &CDataprocessingDlg::OnBnClickedBq3)
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BQ5, &CDataprocessingDlg::OnBnClickedBq5)
+	ON_BN_CLICKED(IDC_BQ7, &CDataprocessingDlg::OnBnClickedBq7)
+	ON_BN_CLICKED(IDC_BQ8, &CDataprocessingDlg::OnBnClickedBq8)
 END_MESSAGE_MAP()
 
 
@@ -165,6 +168,13 @@ void CDataprocessingDlg::OnBnClickedBq4()
 	GetDlgItem(IDC_SQFOut)->SetWindowText(str);
 }
 
+void CDataprocessingDlg::OnBnClickedBq5()
+{
+	// TODO: Add your control notification handler code here
+	flag_Q5 = 1;
+	//GetDlgItem(IDC_SQFivOut)->SetWindowText(_T("Waiting for keyin."));
+}
+
 
 void CDataprocessingDlg::OnBnClickedBq6()
 {
@@ -188,9 +198,75 @@ void CDataprocessingDlg::OnBnClickedBq6()
 	GetDlgItem(IDC_SQSixOut)->SetWindowText(str);
 }
 
+void CDataprocessingDlg::OnBnClickedBq7()
+{
+	// TODO: Add your control notification handler code here
+	//creat data and save in file VII.txt
+/*	FILE *fpx;
+	fpx = fopen("VII.txt","w");
+	CString tmpstr;
+	int t = 0;
+	float x[100],y[100],z[100];
+	float data[100][4];
+	for (t = 0; t < 100; t++)
+	{
+		data[t][0] = t;
+		data[t][1] = (rand()%100)/100.0;
+		data[t][2] = (rand()%100)/100.0;
+		data[t][3] = (rand()%100)/100.0;
+		fprintf(fpx,"%d,%.7f,%.7f,%.7f\n",data[t][0],data[t][1],data[t][2],data[t][3]);
+		tmpstr.Format("%s%d%s%.7f%s%.7f%s%.7f","t is:",t,". x is:",data[t][1],
+			". y is:",data[t][2],". z is: ",data[t][3]);
+		GetDlgItem(IDC_SQSevOut)->SetWindowText(tmpstr);
+		Sleep(10);
+	}
+	fclose(fpx);
+	AfxMessageBox("File saved in Dataprocessing\VII.txt");
+*/
+	CStdioFile myFile;
+	//CFileException fileException;
+	if(myFile.Open("VII.txt",CFile::typeText|CFile::modeCreate|CFile::modeReadWrite))
+	{
+		int t = 0;
+		float data[100][4];
+		CString tmpstr;
+		for (t = 0; t < 100; t++)
+		{
+			data[t][0] = t;
+			//float i = rand()%32768;
+			data[t][1] = (rand()%32768)/32767.0;   // n=rand()%(y-x+1)+x  x~y
+			data[t][2] = (rand()%32768)/32767.0;
+			data[t][3] = (rand()%32768)/32767.0;
+			tmpstr.Format("%s%d%s%.7f%s%.7f%s%.7f","t is:",t,". x is:",data[t][1],
+				". y is:",data[t][2],". z is: ",data[t][3]);
+			GetDlgItem(IDC_SQSevOut)->SetWindowText(tmpstr);
+			tmpstr.Format("%d%s%.7f%s%.7f%s%.7f\n",t,",",data[t][1],
+				",",data[t][2],",",data[t][3]);
+			myFile.WriteString(tmpstr);
+			Sleep(50);
+		}
+	}
+	myFile.Close();
+}
+
+void CDataprocessingDlg::OnBnClickedBq8()
+{
+	// TODO: Add your control notification handler code here
+	CStdioFile myFile;
+	if(myFile.Open("VII.txt",CFile::typeText|CFile::modeReadWrite))
+	{
+		myFile.SeekToBegin();
+		CString str1;
+		myFile.ReadString(str1);
+		CString str2;
+		myFile.ReadString(str2);
+		AfxMessageBox(str1+str2);
+	}
+	myFile.Close();
+}
 
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CDataprocessingDlg::OnTimer(UINT_PTR nIDEvent)
 {
@@ -209,3 +285,31 @@ void CDataprocessingDlg::OnTimer(UINT_PTR nIDEvent)
 	}
 	CDialogEx::OnTimer(nIDEvent);
 }
+
+
+BOOL CDataprocessingDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	//如果处理可视化字符可以使用WM_CHAR, 使用WM_KEYDOWN时需判断大写键, Shift键, Ctrl键, Alt键是否按下
+	if (pMsg->message == WM_CHAR)
+	{
+		//if(pMsg->wParam >= 'a' && pMsg->wParam <= 'z') 
+		//{ AfxMessageBox("小写"); } 
+		//else if(pMsg->wParam >= 'A' && pMsg->wParam <= 'Z') 
+		//{ AfxMessageBox("大写"); } 
+		CString str;
+		str.Format("%c",pMsg->wParam);
+		GetDlgItem(IDC_SQFivOut)->SetWindowText(str);
+		flag_Q5 = 2;
+	}
+	while ((pMsg->message != WM_KEYDOWN)&&(flag_Q5 == 1))
+	{
+		GetDlgItem(IDC_SQFivOut)->SetWindowText(_T("Waiting for keyin."));
+		break;
+	}
+
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+

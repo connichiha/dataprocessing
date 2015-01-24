@@ -38,4 +38,8 @@ public:
 	afx_msg void OnBnClickedBq6();
 	afx_msg void OnBnClickedBq3();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnBnClickedBq5();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnBnClickedBq7();
+	afx_msg void OnBnClickedBq8();
 };
