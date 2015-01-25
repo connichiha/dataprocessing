@@ -45,4 +45,6 @@ public:
 	afx_msg void OnBnClickedBq9();
 	afx_msg void OnBnClickedBq10();
 	afx_msg void OnBnClickedBq11();
+	afx_msg void OnBnClickedBq12();
+	afx_msg void OnBnClickedBq12show();
 };

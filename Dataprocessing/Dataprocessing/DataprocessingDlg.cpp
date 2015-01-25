@@ -48,6 +48,8 @@ BEGIN_MESSAGE_MAP(CDataprocessingDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BQ9, &CDataprocessingDlg::OnBnClickedBq9)
 	ON_BN_CLICKED(IDC_BQ10, &CDataprocessingDlg::OnBnClickedBq10)
 	ON_BN_CLICKED(IDC_BQ11, &CDataprocessingDlg::OnBnClickedBq11)
+	ON_BN_CLICKED(IDC_BQ12, &CDataprocessingDlg::OnBnClickedBq12)
+	ON_BN_CLICKED(IDC_BQ12Show, &CDataprocessingDlg::OnBnClickedBq12show)
 END_MESSAGE_MAP()
 
 
@@ -394,7 +396,7 @@ void CDataprocessingDlg::OnBnClickedBq11()
 {
 	// TODO: Add your control notification handler code here
 	CStdioFile myFile;
-	CString str,tmpstr,showstr;
+	CString str,tmpstr,tmpstr1,showstr,tmpstr2;
 	CString path;
 	float *x[100],*y[100];
 	int *t[100];
@@ -429,13 +431,116 @@ void CDataprocessingDlg::OnBnClickedBq11()
 				y[i] = &data[i][2];
 				//sscanf(str,"%d,%f,%f,%f",t[i],x[i],y[i],z[i]);
 			}
-			tmpstr.Format("%d,%f,%f\n",*t[i],*x[i],*y[i]);
-			showstr = showstr + tmpstr;
+			if ( i == 0)
+			{
+				showstr.Format("%d,%f,%f||",*t[i],*x[i],*y[i]);
+			}
+			else if (i%5 == 0)
+			{
+				tmpstr1.Format("\n%d,%f,%f||",*t[i],*x[i],*y[i]);
+			}
+			else
+				tmpstr1.Format("%d,%f,%f||",*t[i],*x[i],*y[i]);
+
+			showstr = showstr + tmpstr1;
 			i++;			
 		}
 	}
 	myFile.Close();
 	GetDlgItem(IDC_SQEleOut)->SetWindowText(showstr);
+}
+
+struct syushi 
+{
+	int money;
+	CString item;
+	int sum;
+}twe;
+void CDataprocessingDlg::OnBnClickedBq12()
+{
+	// TODO: Add your control notification handler code here
+	twe.money = GetDlgItemInt(IDC_EQTwInM);
+	GetDlgItemText(IDC_EQTwInI,twe.item);
+
+	CString tmpstr1,str;
+	if (twe.money >0)
+	{
+		tmpstr1.Format("+%d,",twe.money);
+	}
+	else
+		tmpstr1.Format("%d,",twe.money);
+
+
+	CStdioFile myFile;
+	if(myFile.Open("syushi.dat",CFile::typeText|CFile::modeCreate|CFile::modeReadWrite|CFile::modeNoTruncate))
+	{
+		myFile.SeekToEnd();
+		str = tmpstr1 + twe.item + "\n";
+		myFile.WriteString(str);
+	}
+	myFile.Close();
+}
+
+
+void CDataprocessingDlg::OnBnClickedBq12show()
+{
+	// TODO: Add your control notification handler code here
+	CStdioFile myFile;
+	CString str,tmpstr0,tmpstr1,showstr,tmpstr2;
+	showstr = "money,    sum,    item\n";
+	CString path;
+	int total[2]; // max == 100
+	int FileLine = 0;
+	int i = 0;
+	path = GetWorkDir();
+	path = path + _T("\\syushi.dat");
+	if(myFile.Open(path,CFile::typeText|CFile::modeReadWrite))
+	{
+		while (myFile.ReadString(str))
+		{
+			int pos = str.Find(",");
+			while(pos>=0) // pos == 0的时候，是逗号在第一个位置，这里不考虑。
+			{
+				tmpstr0 = str.Left(pos);
+				twe.money =atof(tmpstr0);
+				total[0] = twe.money;
+				str = str.Right(str.GetLength()-pos-1);
+				pos = str.Find(",");
+				twe.item = str.Left(pos);
+				str = str.Right(str.GetLength()-pos-1);
+			}
+			if (pos < 0)
+			{
+				twe.item = str;
+			}
+			tmpstr2 = twe.item;
+
+			if (i == 0)
+			{
+				twe.sum = twe.money;
+				total[1] = twe.sum;
+			}
+			else
+			{
+				twe.sum = total[0]+total[1];
+				total[1] = twe.sum;
+			}
+			if (twe.sum > 0)
+			{
+				tmpstr1.Format(",    +%d,    ",twe.sum);
+			}
+			else
+			{
+				tmpstr1.Format(",    %d,    ",twe.sum);
+			}
+
+			showstr = showstr + tmpstr0 + tmpstr1 + tmpstr2 + "\n";
+			i++;
+		}
+	}
+	myFile.Close();
+	GetDlgItem(IDC_SQEleOut)->SetWindowText(showstr);
+
 }
 
 
